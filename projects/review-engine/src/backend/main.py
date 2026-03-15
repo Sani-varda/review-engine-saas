@@ -3,14 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, reviews, billing, google_business
 import models, database
 
+import os
+
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="The Review Engine API", version="0.1.0")
 
+# CORS Configuration
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -44,6 +44,8 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+*.db
+projects/review-engine/src/backend/test.db
 
 # Include the Review Engine project folder
 !projects/review-engine/
