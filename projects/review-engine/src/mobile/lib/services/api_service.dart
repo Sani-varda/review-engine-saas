@@ -1,10 +1,15 @@
-import 'dart:convert';
+import dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/models.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000'; // Update with real IP for production
+  // Use String.fromEnvironment for easy configuration
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:8000', // Android emulator localhost
+  );
+  
   final _storage = const FlutterSecureStorage();
 
   Future<String?> getToken() async {
@@ -23,6 +28,8 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       await _storage.write(key: 'access_token', value: data['access_token']);
+      // In a real app, we'd store business_id if the login response provided it.
+      // For now, we rely on the backend to infer business context from the JWT.
       return true;
     }
     return false;
@@ -67,7 +74,10 @@ class ApiService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: json.encode({'review_text': reviewText}),
+      body: json.encode({
+        'review_text': reviewText,
+        'star_rating': 5 // Default high rating for generated reply context
+      }),
     );
 
     if (response.statusCode == 200) {
@@ -105,6 +115,7 @@ class ApiService {
       body: json.encode({
         'customer_name': name,
         'contact': contact,
+        // Backend now handles business_id lookup via user session
       }),
     );
 

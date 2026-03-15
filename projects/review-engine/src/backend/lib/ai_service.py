@@ -6,7 +6,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 async def generate_review_reply(review_text: str, business_name: str, star_rating: int) -> Optional[str]:
     """
-    Generates an empathetic and professional reply to a customer review using Gemini.
+    Generates an empathetic and professional reply to a customer review using Gemini 2 Flash.
     """
     if not GEMINI_API_KEY:
         print("GEMINI_API_KEY not set. Skipping AI generation.")
@@ -23,7 +23,8 @@ async def generate_review_reply(review_text: str, business_name: str, star_ratin
     Keep the reply under 3 sentences.
     """
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    # Using Gemini 2 Flash for speed and cost efficiency
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2-flash:generateContent?key={GEMINI_API_KEY}"
     
     payload = {
         "contents": [
@@ -41,6 +42,8 @@ async def generate_review_reply(review_text: str, business_name: str, star_ratin
             if response.status_code == 200:
                 result = response.json()
                 return result['candidates'][0]['content']['parts'][0]['text'].strip()
+            else:
+                print(f"Gemini API Error: {response.status_code} - {response.text}")
     except Exception as e:
         print(f"Error generating AI reply: {e}")
     

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import models, database
+import models, database, auth
 from pydantic import BaseModel, EmailStr
 import uuid
 from lib.services import messaging
+from lib.ai_service import generate_review_reply
 
 from datetime import datetime
 
@@ -25,8 +26,20 @@ class ReviewSubmit(BaseModel):
     rating: int
     feedback: Optional[str] = None
 
+class GenerateReplyRequest(BaseModel):
+    review_text: str
+    business_name: str = "our business"
+    star_rating: int = 5
+
+@router.post("/generate-reply")
+async def generate_reply(req: GenerateReplyRequest, current_user: models.User = Depends(auth.get_current_user)):
+    reply = await generate_review_reply(req.review_text, req.business_name, req.star_rating)
+    if not reply:
+        raise HTTPException(status_code=500, detail="AI generation failed")
+    return {"reply": reply}
+
 @router.post("/request", response_model=ReviewRequestOut)
-def create_review_request(request: ReviewRequestCreate, db: Session = Depends(database.get_db)):
+def create_review_request(request: ReviewRequestCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     # Verify customer and business exist
     customer = db.query(models.Customer).filter(models.Customer.id == request.customer_id).first()
     if not customer:
@@ -43,7 +56,6 @@ def create_review_request(request: ReviewRequestCreate, db: Session = Depends(da
     db.refresh(new_request)
     
     # Send Review Request (SMS/Email)
-    # For MVP, we'll use a local URL. In production, this would be the actual domain.
     review_link = f"http://localhost:3000/review/{new_request.id}"
     
     success = messaging.send_review_request(
@@ -117,9 +129,17 @@ def submit_review(request_id: str, review: ReviewSubmit, db: Session = Depends(d
             "message": "Thank you for your feedback. We will look into this immediately."
         }
 
-@router.get("/stats/{business_id}")
-def get_business_stats(business_id: int, db: Session = Depends(database.get_db)):
-    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business_id).all()
+@router.get("/stats")
+def get_business_stats(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    # Infer business_id from the first business owned by the user
+    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
+    if not business:
+        return {
+            "total": 0, "sent": 0, "opened": 0, "completed": 0,
+            "high_rating": 0, "private_feedback": 0, "avg_rating": 0, "conversion_rate": 0
+        }
+        
+    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).all()
     
     total = len(requests)
     sent = len([r for r in requests if r.status == "SENT"])
@@ -143,9 +163,13 @@ def get_business_stats(business_id: int, db: Session = Depends(database.get_db))
         "conversion_rate": round((completed / opened * 100), 1) if opened > 0 else 0
     }
 
-@router.get("/activity/{business_id}")
-def get_recent_activity(business_id: int, db: Session = Depends(database.get_db)):
-    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business_id).order_by(models.ReviewRequest.updated_at.desc()).limit(10).all()
+@router.get("/activity")
+def get_recent_activity(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
+    if not business:
+        return []
+        
+    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).order_by(models.ReviewRequest.updated_at.desc()).limit(10).all()
     
     return [
         {
