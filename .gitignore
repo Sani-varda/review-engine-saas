@@ -1,0 +1,10 @@
+.env
+.credentials/
+*.log
+__pycache__/
+node_modules/
+.tasks/*.yaml
+memory/20*
+.heartbeat/
+.logs/
+EOF

@@ -1,0 +1,26 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import auth, reviews, billing, google_business
+import models, database
+
+# Create tables
+models.Base.metadata.create_all(bind=database.engine)
+
+app = FastAPI(title="The Review Engine API", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(reviews.router)
+app.include_router(billing.router)
+app.include_router(google_business.router)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": "2026-03-01T14:05:00Z"}
