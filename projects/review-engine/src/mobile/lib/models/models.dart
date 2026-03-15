@@ -34,10 +34,10 @@ class Review {
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       id: json['name'] ?? '',
-      reviewerName: json['reviewer']['displayName'] ?? 'Anonymous',
+      reviewerName: json['reviewer']?['displayName'] ?? 'Anonymous',
       comment: json['comment'] ?? '',
       starRating: _parseStarRating(json['starRating']),
-      createTime: DateTime.parse(json['createTime']),
+      createTime: DateTime.parse(json['createTime'] ?? DateTime.now().toIsoformat()),
       reply: json['reviewReply']?['comment'],
     );
   }
@@ -48,26 +48,30 @@ class Review {
     if (rating == 'THREE') return 3;
     if (rating == 'TWO') return 2;
     if (rating == 'ONE') return 1;
+    if (rating is int) return rating;
     return 0;
   }
 }
 
 class DashboardStats {
   final double averageRating;
-  final int totalReviews;
-  final int pendingReplies;
+  final int totalRequests;
+  final int completedReviews;
+  final double conversionRate;
 
   DashboardStats({
     required this.averageRating,
-    required this.totalReviews,
-    required this.pendingReplies,
+    required this.totalRequests,
+    required this.completedReviews,
+    required this.conversionRate,
   });
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
     return DashboardStats(
-      averageRating: json['average_rating']?.toDouble() ?? 0.0,
-      totalReviews: json['total_reviews'] ?? 0,
-      pendingReplies: json['pending_replies'] ?? 0,
+      averageRating: json['avg_rating']?.toDouble() ?? 0.0,
+      totalRequests: json['total'] ?? 0,
+      completedReviews: json['completed'] ?? 0,
+      conversionRate: json['conversion_rate']?.toDouble() ?? 0.0,
     );
   }
 }

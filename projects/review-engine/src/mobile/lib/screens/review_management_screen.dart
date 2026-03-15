@@ -84,7 +84,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                     child: OutlinedButton.icon(
                       onPressed: isGenerating ? null : () async {
                         setModalState(() => isGenerating = true);
-                        final aiReply = await _apiService.generateAiReply(review.comment);
+                        final aiReply = await _apiService.generateAiReply(review.comment, review.starRating);
                         if (aiReply != null) {
                           replyController.text = aiReply;
                         }

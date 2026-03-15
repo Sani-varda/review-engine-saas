@@ -136,9 +136,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       childAspectRatio: 1.2,
       children: [
         _buildStatCard('Avg Rating', _stats?.averageRating.toStringAsFixed(1) ?? '0.0', LucideIcons.star, Colors.amber),
-        _buildStatCard('Total Reviews', _stats?.totalReviews.toString() ?? '0', LucideIcons.users, Colors.blue),
-        _buildStatCard('Pending', _stats?.pendingReplies.toString() ?? '0', LucideIcons.clock, Colors.orange),
-        _buildStatCard('Growth', '+12%', LucideIcons.trendingUp, Colors.green),
+        _buildStatCard('Requests', _stats?.totalRequests.toString() ?? '0', LucideIcons.send, Colors.blue),
+        _buildStatCard('Reviews', _stats?.completedReviews.toString() ?? '0', LucideIcons.checkCircle, Colors.green),
+        _buildStatCard('Conversion', '${_stats?.conversionRate.toStringAsFixed(1) ?? "0.0"}%', LucideIcons.trendingUp, Colors.violet),
       ],
     );
   }

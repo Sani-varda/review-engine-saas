@@ -31,6 +31,57 @@ class GenerateReplyRequest(BaseModel):
     business_name: str = "our business"
     star_rating: int = 5
 
+@router.get("/stats")
+def get_business_stats(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    # Infer business_id from the first business owned by the user
+    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
+    if not business:
+        return {
+            "total": 0, "sent": 0, "opened": 0, "completed": 0,
+            "high_rating": 0, "private_feedback": 0, "avg_rating": 0, "conversion_rate": 0
+        }
+        
+    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).all()
+    
+    total = len(requests)
+    sent = len([r for r in requests if r.status == "SENT"])
+    opened = len([r for r in requests if r.status in ["OPENED", "COMPLETED"]])
+    completed = len([r for r in requests if r.status == "COMPLETED"])
+    high_rating = len([r for r in requests if r.status == "COMPLETED" and r.rating >= 4])
+    private_feedback = len([r for r in requests if r.status == "COMPLETED" and r.rating < 4])
+    
+    avg_rating = 0
+    if completed > 0:
+        avg_rating = sum([r.rating for r in requests if r.rating]) / completed
+
+    return {
+        "total": total,
+        "sent": sent,
+        "opened": opened,
+        "completed": completed,
+        "high_rating": high_rating,
+        "private_feedback": private_feedback,
+        "avg_rating": round(avg_rating, 1),
+        "conversion_rate": round((completed / opened * 100), 1) if opened > 0 else 0
+    }
+
+@router.get("/activity")
+def get_recent_activity(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
+    if not business:
+        return []
+        
+    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).order_by(models.ReviewRequest.updated_at.desc()).limit(10).all()
+    
+    return [
+        {
+            "name": r.customer.name,
+            "status": r.status,
+            "rating": r.rating,
+            "updated_at": r.updated_at.isoformat()
+        } for r in requests
+    ]
+
 @router.post("/generate-reply")
 async def generate_reply(req: GenerateReplyRequest, current_user: models.User = Depends(auth.get_current_user)):
     reply = await generate_review_reply(req.review_text, req.business_name, req.star_rating)
@@ -128,54 +179,3 @@ def submit_review(request_id: str, review: ReviewSubmit, db: Session = Depends(d
             "action": "THANK_YOU",
             "message": "Thank you for your feedback. We will look into this immediately."
         }
-
-@router.get("/stats")
-def get_business_stats(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    # Infer business_id from the first business owned by the user
-    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
-    if not business:
-        return {
-            "total": 0, "sent": 0, "opened": 0, "completed": 0,
-            "high_rating": 0, "private_feedback": 0, "avg_rating": 0, "conversion_rate": 0
-        }
-        
-    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).all()
-    
-    total = len(requests)
-    sent = len([r for r in requests if r.status == "SENT"])
-    opened = len([r for r in requests if r.status in ["OPENED", "COMPLETED"]])
-    completed = len([r for r in requests if r.status == "COMPLETED"])
-    high_rating = len([r for r in requests if r.status == "COMPLETED" and r.rating >= 4])
-    private_feedback = len([r for r in requests if r.status == "COMPLETED" and r.rating < 4])
-    
-    avg_rating = 0
-    if completed > 0:
-        avg_rating = sum([r.rating for r in requests if r.rating]) / completed
-
-    return {
-        "total": total,
-        "sent": sent,
-        "opened": opened,
-        "completed": completed,
-        "high_rating": high_rating,
-        "private_feedback": private_feedback,
-        "avg_rating": round(avg_rating, 1),
-        "conversion_rate": round((completed / opened * 100), 1) if opened > 0 else 0
-    }
-
-@router.get("/activity")
-def get_recent_activity(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
-    if not business:
-        return []
-        
-    requests = db.query(models.ReviewRequest).filter(models.ReviewRequest.business_id == business.id).order_by(models.ReviewRequest.updated_at.desc()).limit(10).all()
-    
-    return [
-        {
-            "name": r.customer.name,
-            "status": r.status,
-            "rating": r.rating,
-            "updated_at": r.updated_at.isoformat()
-        } for r in requests
-    ]

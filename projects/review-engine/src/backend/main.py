@@ -2,13 +2,32 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, reviews, billing, google_business
 import models, database
-
 import os
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from scripts.auto_reply_sync import sync_and_reply
+from contextlib import asynccontextmanager
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
 
-app = FastAPI(title="The Review Engine API", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the auto-reply scheduler
+    scheduler = AsyncIOScheduler()
+    # Run every 1 hour (adjust as needed for production)
+    scheduler.add_job(sync_and_reply, 'interval', hours=1)
+    scheduler.start()
+    print("⏰ Auto-reply scheduler started.")
+    yield
+    # Shutdown
+    scheduler.shutdown()
+    print("⏰ Auto-reply scheduler stopped.")
+
+app = FastAPI(
+    title="The Review Engine API", 
+    version="0.1.0",
+    lifespan=lifespan
+)
 
 # CORS Configuration
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
