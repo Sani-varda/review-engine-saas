@@ -86,6 +86,13 @@ async def sync_and_reply():
                                 if post_resp.status_code == 200:
                                     # Save to DB
                                     if not existing:
+                                        # Use createTime from Google if present
+                                        create_time_raw = review.get("createTime")
+                                        try:
+                                            create_time = datetime.fromisoformat(create_time_raw.replace('Z', '+00:00')) if create_time_raw else datetime.utcnow()
+                                        except:
+                                            create_time = datetime.utcnow()
+                                            
                                         new_review = models.GoogleReview(
                                             id=review_id,
                                             business_id=business.id,
@@ -94,7 +101,7 @@ async def sync_and_reply():
                                             comment=comment,
                                             reply_text=ai_reply,
                                             status="REPLIED",
-                                            create_time=datetime.utcnow(), # Approximate if parsing fails
+                                            create_time=create_time,
                                             update_time=datetime.utcnow()
                                         )
                                         db.add(new_review)
