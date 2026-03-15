@@ -14,6 +14,17 @@ USER.md
 WORKFLOW.md
 BOOTSTRAP.md
 
+# GSD Methodology Files
+.agent/
+.gsd/
+.gemini/
+adapters/
+docs/
+scripts/
+PROJECT_RULES.md
+GSD-STYLE.md
+model_capabilities.yaml
+
 # Workspace Folders
 .clawhub/
 .tasks/
@@ -26,9 +37,6 @@ n8n/
 notes/
 projects/moonlit-arc-pipeline.md
 projects/review-engine.md
-scripts/
-skills/
-specs/
 subagents/
 venv/
 node_modules/
