@@ -24,7 +24,8 @@ leads/
 memory/
 n8n/
 notes/
-projects/
+projects/moonlit-arc-pipeline.md
+projects/review-engine.md
 scripts/
 skills/
 specs/
@@ -36,5 +37,6 @@ __pycache__/
 .env
 .DS_Store
 
-# Except the Review Engine project
+# Include the Review Engine project folder
 !projects/review-engine/
+!projects/review-engine/**

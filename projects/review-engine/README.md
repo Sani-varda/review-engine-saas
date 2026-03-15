@@ -1,45 +1,109 @@
-# The Review Engine
+# 🌟 The Review Engine (Production SaaS)
 
-A production-grade Reputation Management SaaS built for small businesses.
+> **Automated Reputation Management for Local Businesses.**
 
-## Overview
+**The Review Engine** is a high-performance, production-ready vertical SaaS designed to help local businesses (Dental Clinics, MedSpas, Salons, etc.) dominate their local market by automating review collection, intelligently gating feedback, and leveraging AI for review management.
 
-The Review Engine automates the process of collecting customer reviews and managing business reputation. It features a "Review Gating" mechanism that encourages happy customers to post public reviews while keeping negative feedback private.
+---
 
-## Features
+## 🚀 Key Features
 
-- **Review Gating:** Intelligent routing based on star rating.
-- **Messaging Service:** Integrated with Twilio and Resend for SMS/Email outreach.
-- **Analytics Dashboard:** Track ratings, response rates, and customer sentiment.
-- **Subscription Management:** Built-in Stripe integration for tiered access.
-- **Owner Alerts:** Real-time notifications for low-rating feedback.
+### 🛡️ 1. Intelligent Review Gating
+Automatically filter customer sentiment before it hits public platforms.
+- **High Ratings (4-5 Stars):** Customers are instantly redirected to your Google Business Profile, Yelp, or Facebook page to post public reviews.
+- **Low Ratings (1-3 Stars):** Customers are routed to a private feedback form. The owner is notified in real-time to resolve the issue internally, preventing public negative reviews.
 
-## Project Structure
+### 🤖 2. AI-Powered Review Management
+Manage your Google Business Profile directly from the dashboard.
+- **Auto-Fetch:** Automatically syncs reviews from your Google Maps locations.
+- **AI Auto-Replies:** Generates personalized, empathetic responses to Google reviews using **Gemini-3-Flash**.
+- **One-Tap Posting:** Edit and post AI-drafted replies back to Google with a single click.
 
-- `src/backend`: FastAPI application with PostgreSQL/SQLite.
-- `src/frontend`: Next.js dashboard and review landing pages.
-- `infra/docker`: Containerization and deployment configuration.
+### 📱 3. Multi-Platform Support
+- **Web Dashboard:** A premium Next.js dashboard for full management and deep analytics.
+- **Mobile App (Flutter):** Manage reviews, send invites, and track stats on the go with a native iOS/Android experience.
+- **Review Landing Pages:** High-converting, mobile-optimized pages for customer feedback.
 
-## Getting Started
+### 📩 4. Automated Outreach
+- **Omnichannel:** Send review requests via **SMS (Twilio)** or **Email (Resend)**.
+- **CRM Integration:** Manage customer lists and track the status of every review request (Sent, Opened, Completed).
+
+### 📈 5. Advanced Analytics
+- Real-time tracking of average ratings, review growth, and conversion rates.
+- Detailed activity logs of all customer interactions.
+
+---
+
+## 🛠️ Technical Stack
+
+- **Backend:** FastAPI (Python 3.11) - Async, high-performance API.
+- **Frontend:** Next.js 14 + Tailwind CSS + Lucide Icons.
+- **Mobile:** Flutter (iOS & Android).
+- **Database:** PostgreSQL (SQLAlchemy ORM).
+- **AI:** Google Gemini-3-Flash.
+- **DevOps:** Docker & Docker Compose.
+
+---
+
+## 📦 Project Structure
+
+```bash
+projects/review-engine/
+├── src/
+│   ├── backend/    # FastAPI Python API
+│   ├── frontend/   # Next.js Web Dashboard
+│   └── mobile/     # Flutter Cross-Platform App
+├── docs/           # Architecture & Whitepapers
+├── specs/          # PRD & Technical Specs
+└── docker-compose.yml
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Docker & Docker Compose
-- Python 3.11+ (for local dev)
-- Node.js 20+ (for local dev)
+- Google Cloud Project (for GBP API & OAuth2)
+- Twilio Account (for SMS)
+- Resend Account (for Email)
 
-### Installation
-1. Clone the repository.
-2. Copy `.env.example` to `.env` and fill in your keys.
-3. Run `docker-compose up --build`.
+### Quick Start
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Sani-varda/review-engine-saas.git
+   cd review-engine-saas/projects/review-engine
+   ```
 
-## API Documentation
+2. **Configure Environment**:
+   Create a `.env` file in `projects/review-engine/` (see `.env.example`).
 
-The backend provides a Swagger UI at `/docs`.
+3. **Deploy with Docker**:
+   ```bash
+   docker compose up -d --build
+   ```
 
-- `POST /auth/register`: Create a new business account.
-- `GET /reviews/stats`: Get overview stats for the dashboard.
-- `POST /reviews/request`: Send a review request to a customer.
+---
 
-## License
+## 📊 Business Logic: The Gating Flow
 
-Proprietary - Developed by MoonLIT Arc.
+```python
+if review.rating >= 4:
+    # Redirect to Public Google/Yelp URL
+    return {
+        "action": "REDIRECT",
+        "url": business.google_review_url
+    }
+else:
+    # Capturing Negative Sentiment Privately
+    messaging.send_owner_alert(business.owner_email, review.rating, review.feedback)
+    return {
+        "action": "THANK_YOU",
+        "message": "Thank you. We will contact you shortly to resolve this."
+    }
+```
+
+---
+
+## 📜 License
+Proprietary - Developed by **MoonLIT Arc**.
