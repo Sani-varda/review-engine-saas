@@ -62,7 +62,8 @@ def get_business_stats(db: Session = Depends(database.get_db), current_user: mod
         "high_rating": high_rating,
         "private_feedback": private_feedback,
         "avg_rating": round(avg_rating, 1),
-        "conversion_rate": round((completed / opened * 100), 1) if opened > 0 else 0
+        "conversion_rate": round((completed / opened * 100), 1) if opened > 0 else 0,
+        "auto_reply_enabled": business.auto_reply_enabled
     }
 
 @router.get("/activity")

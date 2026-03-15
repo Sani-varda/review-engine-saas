@@ -118,4 +118,14 @@ class ApiService {
 
     return response.statusCode == 200;
   }
+
+  Future<bool> toggleAutoReply(bool enabled) async {
+    final token = await getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/google/auto-reply/toggle?enabled=$enabled'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    return response.statusCode == 200;
+  }
 }

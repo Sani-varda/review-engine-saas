@@ -58,12 +58,14 @@ class DashboardStats {
   final int totalRequests;
   final int completedReviews;
   final double conversionRate;
+  final bool autoReplyEnabled;
 
   DashboardStats({
     required this.averageRating,
     required this.totalRequests,
     required this.completedReviews,
     required this.conversionRate,
+    required this.autoReplyEnabled,
   });
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
@@ -72,6 +74,7 @@ class DashboardStats {
       totalRequests: json['total'] ?? 0,
       completedReviews: json['completed'] ?? 0,
       conversionRate: json['conversion_rate']?.toDouble() ?? 0.0,
+      autoReplyEnabled: json['auto_reply_enabled'] ?? false,
     );
   }
 }

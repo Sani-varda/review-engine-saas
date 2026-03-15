@@ -35,6 +35,7 @@ class Business(Base):
     google_location_id = Column(String, nullable=True) # e.g. accounts/123/locations/456...
     google_refresh_token = Column(String, nullable=True)
     google_connected = Column(Boolean, default=False)
+    auto_reply_enabled = Column(Boolean, default=False)
 
 class GoogleReview(Base):
     __tablename__ = "google_reviews"

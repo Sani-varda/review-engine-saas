@@ -118,6 +118,16 @@ async def google_callback(code: str, business_id: int, db: Session = Depends(dat
     db.commit()
     return {"status": "success", "account_id": business.google_account_id, "location_id": business.google_location_id}
 
+@router.post("/auto-reply/toggle")
+async def toggle_auto_reply(enabled: bool, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+        
+    business.auto_reply_enabled = enabled
+    db.commit()
+    return {"status": "success", "auto_reply_enabled": business.auto_reply_enabled}
+
 @router.get("/reviews")
 async def get_google_reviews(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     business = db.query(models.Business).filter(models.Business.owner_id == current_user.id).first()

@@ -127,19 +127,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.2,
+    if (_stats == null) {
+      return Center(
+        child: Column(
+          children: [
+            const Icon(LucideIcons.alertTriangle, color: Colors.orange, size: 48),
+            const SizedBox(height: 16),
+            const Text('Failed to load dashboard data.', style: TextStyle(color: Colors.white70)),
+            TextButton(onPressed: _loadStats, child: const Text('Retry')),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildStatCard('Avg Rating', _stats?.averageRating.toStringAsFixed(1) ?? '0.0', LucideIcons.star, Colors.amber),
-        _buildStatCard('Requests', _stats?.totalRequests.toString() ?? '0', LucideIcons.send, Colors.blue),
-        _buildStatCard('Reviews', _stats?.completedReviews.toString() ?? '0', LucideIcons.checkCircle, Colors.green),
-        _buildStatCard('Conversion', '${_stats?.conversionRate.toStringAsFixed(1) ?? "0.0"}%', LucideIcons.trendingUp, Colors.violet),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          children: [
+            _buildStatCard('Avg Rating', _stats?.averageRating.toStringAsFixed(1) ?? '0.0', LucideIcons.star, Colors.amber),
+            _buildStatCard('Requests', _stats?.totalRequests.toString() ?? '0', LucideIcons.send, Colors.blue),
+            _buildStatCard('Reviews', _stats?.completedReviews.toString() ?? '0', LucideIcons.checkCircle, Colors.green),
+            _buildStatCard('Conversion', '${_stats?.conversionRate.toStringAsFixed(1) ?? "0.0"}%', LucideIcons.trendingUp, Colors.violet),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildAutoReplyToggle(),
       ],
+    );
+  }
+
+  Widget _buildAutoReplyToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(LucideIcons.bot, color: Colors.blue),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('AI Auto-Reply', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Post replies automatically', style: TextStyle(fontSize: 12, color: Colors.white54)),
+              ],
+            ),
+          ),
+          Switch(
+            value: _stats?.autoReplyEnabled ?? false,
+            onChanged: (val) async {
+              final success = await _apiService.toggleAutoReply(val);
+              if (success) {
+                _loadStats();
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

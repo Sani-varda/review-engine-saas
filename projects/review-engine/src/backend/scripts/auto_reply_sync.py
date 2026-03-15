@@ -26,6 +26,7 @@ async def sync_and_reply():
     try:
         businesses = db.query(models.Business).filter(
             models.Business.google_connected == True,
+            models.Business.auto_reply_enabled == True,
             models.Business.google_refresh_token != None,
             models.Business.google_location_id != None
         ).all()
