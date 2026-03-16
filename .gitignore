@@ -1,4 +1,4 @@
-# OpenClaw System Files
+# OpenClaw System Files (DO NOT PUSH)
 AGENTS.md
 BOARD.md
 HEARTBEAT.md
@@ -13,40 +13,48 @@ TOOLS.md
 USER.md
 WORKFLOW.md
 BOOTSTRAP.md
-
-# GSD Methodology Files
-.agent/
-.gsd/
-.gemini/
-adapters/
-docs/
-scripts/
-PROJECT_RULES.md
-GSD-STYLE.md
-model_capabilities.yaml
-
-# Workspace Folders
-.clawhub/
 .tasks/
 .logs/
-content/
-drafts/
-leads/
-memory/
-n8n/
-notes/
-projects/moonlit-arc-pipeline.md
-projects/review-engine.md
+.clawhub/
 subagents/
 venv/
 node_modules/
 __pycache__/
 *.pyc
-.env
 .DS_Store
 *.db
+.env
+
+# GSD Methodology Files (User requested to keep out of GitHub)
+.agent/
+.gsd/
+.gemini/
+adapters/
+docs/
+# Only exclude the GSD specific validation scripts, but keep agency scripts
+scripts/validate-*.sh
+scripts/validate-*.ps1
+scripts/setup_search.*
+scripts/search_repo.*
+PROJECT_RULES.md
+GSD-STYLE.md
+model_capabilities.yaml
+
+# Project specific exclusions
 projects/review-engine/src/backend/test.db
 
-# Include the Review Engine project folder
-!projects/review-engine/
-!projects/review-engine/**
+# ALLOW LIST (Project Files)
+!projects/
+!scripts/
+!content/
+!leads/
+!memory/
+!notes/
+!n8n/
+!projects/moonlit-arc-pipeline.md
+!projects/review-engine.md
+!scripts/daily_lead_sync.py
+!scripts/marcus_outreach.py
+!scripts/send_resend_email.py
+!scripts/enrichment_service.py
+!scripts/git_sync.sh
